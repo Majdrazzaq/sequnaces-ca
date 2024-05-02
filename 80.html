@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sequence Calculator</title>
+</head>
+<body>
+    <h1>Sequence Calculator</h1>
+    <label for="term1">1st Term:</label><br>
+    <input type="text" id="term1"><br>
+    <label for="term2">2nd Term:</label><br>
+    <input type="text" id="term2"><br>
+    <label for="term3">3rd Term:</label><br>
+    <input type="text" id="term3"><br>
+    <label for="term4">4th Term:</label><br>
+    <input type="text" id="term4"><br>
+    <label for="target">Enter the target number to stop the sequence:</label><br>
+    <input type="text" id="target"><br>
+    <button onclick="calculateSequence()">Calculate</button><br>
+    <p id="result"></p>
+
+    <script>
+        function determineSequenceType(sequence) {
+            if (sequence.length < 3)
+                return "Other"; // Not enough terms to determine sequence type
+
+            let diff1 = sequence[1] - sequence[0];
+            let ratio1 = sequence[1] / sequence[0];
+            let diff2 = sequence[2] - sequence[1];
+            let ratio2 = sequence[2] / sequence[1];
+
+            if (Math.abs(diff1 - diff2) <= Number.EPSILON)
+                return "Arithmetic";
+            else if (Math.abs(ratio1 - ratio2) <= Number.EPSILON)
+                return "Geometric";
+            else {
+                let ratio3 = sequence[2] / sequence[1];
+                let ratio4 = sequence[1] / sequence[0];
+                let diff3 = sequence[2] - 2 * sequence[1] + sequence[0];
+                if (Math.abs(ratio3 - ratio4 - diff3) <= Number.EPSILON)
+                    return "Quadratic";
+                else {
+                    let ratio5 = sequence[3] / sequence[2];
+                    let ratio6 = sequence[2] / sequence[1];
+                    let ratio7 = sequence[1] / sequence[0];
+                    let diff4 = ratio5 - ratio6;
+                    let diff5 = ratio6 - ratio7;
+                    if (Math.abs(diff4 - diff5) <= Number.EPSILON)
+                        return "Cubic";
+                    else
+                        return "Other"; // Unsupported sequence type
+                }
+            }
+        }
+
+        function calculateNthTermArithmetic(a, d, n) {
+            return a + (n - 1) * d;
+        }
+
+        function calculateNthTermGeometric(a, r, n) {
+            return a * Math.pow(r, n - 1);
+        }
+
+        function calculateNthTermQuadratic(a, b, c, n) {
+            return a * n * n + b * n + c;
+        }
+
+        function calculateNthTermCubic(a, b, c, d, n) {
+            return a * n * n * n + b * n * n + c * n + d;
+        }
+
+        function calculateSequence() {
+            let term1 = parseFloat(document.getElementById("term1").value);
+            let term2 = parseFloat(document.getElementById("term2").value);
+            let term3 = parseFloat(document.getElementById("term3").value);
+            let term4 = parseFloat(document.getElementById("term4").value);
+            let target = parseFloat(document.getElementById("target").value);
+            let result = document.getElementById("result");
+            let sequence = [term1, term2, term3, term4];
+
+            let seqType = determineSequenceType(sequence);
+            let output = "Sequence type: " + seqType + "<br>";
+
+            if (seqType === "Arithmetic") {
+                let d = sequence[1] - sequence[0];
+                output += "General term formula: an = " + sequence[0] + " + (n - 1) * " + d + "<br>";
+                let n = 5;
+                while (true) {
+                    let nextTerm = calculateNthTermArithmetic(sequence[0], d, n);
+                    if (nextTerm > target)
+                        break;
+                    output += "Term " + n + ": " + nextTerm + "<br>";
+                    ++n;
+                }
+            } else if (seqType === "Geometric") {
+                let r = sequence[1] / sequence[0];
+                output += "General term formula: an = " + sequence[0] + " * (" + r + ")^(n - 1)" + "<br>";
+                let n = 5;
+                while (true) {
+                    let nextTerm = calculateNthTermGeometric(sequence[0], r, n);
+                    if (nextTerm > target)
+                        break;
+                    output += "Term " + n + ": " + nextTerm + "<br>";
+                    ++n;
+                }
+            } else if (seqType === "Quadratic") {
+                let b = sequence[1] - 2 * sequence[0] + sequence[2];
+                let c = sequence[0] - sequence[1] + b;
+                output += "General term formula: an = " + sequence[0] + " * n^2 + " + b + " * n + " + c + "<br>";
+                let n = 5;
+                while (true) {
+                    let nextTerm = calculateNthTermQuadratic(sequence[0], b, c, n);
+                    if (nextTerm > target)
+                        break;
+                    output += "Term " + n + ": " + nextTerm + "<br>";
+                    ++n;
+                }
+            } else if (seqType === "Cubic") {
+                let b = (sequence[2] - sequence[1]) - (sequence[1] - sequence[0]);
+                let c = sequence[1] - sequence[0] - b;
+                let d = sequence[0];
+                output += "General term formula: an = " + sequence[0] + " * n^3 + " + b + " * n^2 + " + c + " * n + " + d + "<br>";
+                let n = 5;
+                while (true) {
+                    let nextTerm = calculateNthTermCubic(sequence[0], b, c, d, n);
+                    if (nextTerm > target)
+                        break;
+                    output += "Term " + n + ": " + nextTerm + "<br>";
+                    ++n;
+                }
+            } else {
+                output += "Sequence type is not supported.";
+            }
+
+            result.innerHTML = output;
+        }
+    </script>
+</body>
+</html>
